@@ -1,0 +1,8 @@
+prefix=/home/local/ITAM/dvillafus/proyecto/catkin_ws/install
+
+Name: proyecto_monitoreo
+Description: Description of proyecto_monitoreo
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/local/ITAM/dvillafus/proyecto/catkin_ws/install/lib 
+Requires: 
