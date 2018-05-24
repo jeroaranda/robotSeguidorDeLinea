@@ -1,0 +1,79 @@
+import rospy
+from std_msgs.msg import String
+
+def callback(data):
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+
+
+def listener():
+	# In ROS, nodes are uniquely named. If two nodes with the same
+    # node are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'listener' node so that multiple listeners can
+    # run simultaneously.
+    rospy.init_node('listener', anonymous=True)
+    rospy.Subscriber("chatter", String, callback)
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+if __name__ == '__main__':
+	listener()
+
+
+def talker():
+    pub = rospy.Publisher('chatter', String, queue_size=10)
+    rospy.init_node('talker', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown():
+        hello_str = "hello world %s" % rospy.get_time()
+        rospy.loginfo(hello_str)
+        pub.publish(hello_str)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        talker()
+    except rospy.ROSInterruptException:
+        pass
+
+
+
+def sigue_linea(input):
+   '''This function takes in readings from two infrared sensors (left and right), 
+   a servo motor (180 degrees) and the speed of a motor and returns a positional
+   value for the servomotor and speed
+
+   The input is an 7 character string organized as follows:
+   input(0) --> Reading from the LEFT IR sensor. 0 means off and 1 means on.
+   input(1) --> Reading from the RIGHT IR sensor. 0 means off and 1 means on.
+   input(2:5) --> Reading from the SERVO MOTOR. 3 digits mean the degrees of position.
+   input(5:) --> Reading from the MOTOR. 2 digits mean speed from 0 to 99.
+
+   The output is a 5 character string organized as follows:
+   output(0:3) --> Angle for the servo motor
+   output(3:) --> Speed for the motor
+   '''
+
+   input_left_ir = int(input[0])
+   input_right_ir = int(input[1])
+   input_servo = int(input[2:5])
+   input_motor = int(input[5:])
+
+   print(input_left_ir)
+   print(input_right_ir)
+
+   output_servo = input_servo
+   output_motor = input_motor
+
+   if input_left_ir == 1 and input_right_ir == 0:
+   	print('Vuelta a la izquierda')
+   	output_servo = input_servo + 1
+   if input_left_ir == 0 and input_right_ir == 1:
+   	print('Vuelta a la derecha')
+   	output_servo = input_servo - 1
+
+   output = str(output_servo) + str(output_motor)
+
+   return output
+
+print(sigue_linea("1012050")
+
