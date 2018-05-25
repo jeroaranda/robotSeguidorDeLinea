@@ -1,23 +1,27 @@
 #include <ros.h>
 #include <std_msgs/String.h>
 ros::NodeHandle nh;
-
 std_msgs::String str_msg;
+std_msgs::String msg_msg;
 ros::Publisher chatter("chatter", &str_msg);
+ros::Publisher dis("dis", &msg_msg);
 
-char hello[13] = "Hello world!";
-
-
+int sum;
 volatile unsigned int pulse;
 #include <Servo.h>
 Servo myservo;
-char mensaje;
+int vin;
+int v;
+int pos;
+
 
 void setup() {
+  pos=90;
+  sum=0;
   // setup de ros con xbee
    nh.initNode();
-  nh.advertise(chatter);
-    
+    nh.advertise(chatter);
+    nh.advertise(dis);
     cli();//stop interrupts
      //set timer1 interrupt at 1Hz
     TCCR5A = 0;// set entire TCCR1A register to 0
@@ -50,13 +54,20 @@ void setup() {
   interrupts();
   //el motor se arranca
   digitalWrite(10,HIGH);
-  analogWrite(8,100);
+  
   sei();//allow interrupts
 }
-
 void loop() {
-  
- 
+  if(digitalRead(6)&&!digitalRead(7)&&pos<170)
+    pos++;
+  else if(!digitalRead(6)&&digitalRead(7)&&pos>10)
+    pos--;
+  myservo.write(pos); 
+  int e=abs(pos-90);
+  int k=1.25;
+   int aux=255-k*e;
+  analogWrite(8,aux);
+  delay(25);
   nh.spinOnce();
 }
 
@@ -77,19 +88,14 @@ ISR(TIMER5_COMPA_vect){
   aux=pulse*300/16;
   if(aux<10)
     msj+="0";
+  if(aux<100)
+    msj+="0";
   msj+=String(aux);
-  
-  
-  
-  
+  v=aux;  
   char mensaje[msj.length() + 1];
   msj.toCharArray(mensaje,msj.length()+1);
-  
-  
-  
-  //Se publica en chatter.
   str_msg.data = mensaje;
   chatter.publish( &str_msg );
-   pulse=0;  
+   pulse=0;
 }
 
